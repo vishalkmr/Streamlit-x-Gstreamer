@@ -10,7 +10,5 @@ Before running this application, make sure you have the following dependencies i
 You can install Python 3 from the official Python website.
 
 To install Streamlit and GStreamer, you can run the following command in your terminal:
-`pip install streamlit`
-`sudo apt-get install libgstreamer1.0-dev gstreamer1.0-plugins-good gstreamer1.0-tools`
-
-Alternatively, you can also install GStreamer using the official GStreamer website.
+```pip install streamlit```
+```sudo apt-get install libgstreamer1.0-dev gstreamer1.0-plugins-good gstreamer1.0-tools```
