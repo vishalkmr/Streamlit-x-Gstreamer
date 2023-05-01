@@ -7,7 +7,7 @@ Before running this application, make sure you have the following dependencies i
 - Streamlit
 - GStreamer
 
-You can install Python 3 from the official Python website.
+You can install Python 3 from the official [Python](https://www.python.org/downloads/) website.
 
 To install [Streamlit](https://docs.streamlit.io/library/get-started/installation) and [GStreamer](https://gstreamer.freedesktop.org/documentation/installing/index.html?gi-language=c), you can run the following command in your terminal:
 
