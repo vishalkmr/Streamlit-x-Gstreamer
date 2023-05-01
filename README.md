@@ -11,6 +11,10 @@ You can install Python 3 from the official Python website.
 
 To install [Streamlit](https://docs.streamlit.io/library/get-started/installation) and [GStreamer](https://gstreamer.freedesktop.org/documentation/installing/index.html?gi-language=c), you can run the following command in your terminal:
 
-```pip install streamlit```
+```
+    pip install streamlit
+```
 
-```sudo apt-get install libgstreamer1.0-dev gstreamer1.0-plugins-good gstreamer1.0-tools```
+```
+    sudo apt-get install libgstreamer1.0-dev gstreamer1.0-plugins-good gstreamer1.0-tools
+```
