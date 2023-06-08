@@ -10,7 +10,7 @@ https://github.com/vishalkmr/Streamlit-x-Gstreamer/assets/20735280/a965bdad-efc6
 Before running this application, make sure you have the following dependencies installed:
 
 1. Python 3
- You can install Python 3 from the official [Python](https://www.python.org/downloads/) website.
+   You can install Python 3 from the official [Python](https://www.python.org/downloads/) website.
 
 2. Streamlit
  To install [Streamlit](https://docs.streamlit.io/library/get-started/installation) use the following cmd:
