@@ -13,16 +13,16 @@ Before running this application, make sure you have the following dependencies i
    You can install Python 3 from the official [Python](https://www.python.org/downloads/) website.
 
 2. Streamlit
- To install [Streamlit](https://docs.streamlit.io/library/get-started/installation) use the following cmd:
- ```
-     pip install streamlit
- ```
+   To install [Streamlit](https://docs.streamlit.io/library/get-started/installation) use the following cmd:
+   ```sh
+       pip install streamlit
+   ```
 
 3. GStreamer
- To install [GStreamer](https://gstreamer.freedesktop.org/documentation/installing/index.html?gi-language=c) use the following cmd:
- ```
-     sudo apt-get install libgstreamer1.0-dev gstreamer1.0-plugins-good gstreamer1.0-tools
- ```
+   To install [GStreamer](https://gstreamer.freedesktop.org/documentation/installing/index.html?gi-language=c) use the following cmd:
+   ```sh
+       sudo apt-get install libgstreamer1.0-dev gstreamer1.0-plugins-good gstreamer1.0-tools
+   ```
 
 ## Task Done
 - [x] Integrating GStreamer-based video player with Streamlit frameworks
