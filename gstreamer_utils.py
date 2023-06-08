@@ -1,7 +1,6 @@
 import gi
 gi.require_version('Gst', '1.0')
-from gi.repository import Gst, GLib
-import os , time
+from gi.repository import Gst
 import cv2
 import numpy as np
 
@@ -27,67 +26,59 @@ def add_videoconvert(pipeline,element):
     element.link(videoconvert)
     return videoconvert
 
+def add_capsfilter(pipeline, element, format="I420"):
+    caps_str = f"video/x-raw, format=(string){format}"
+    caps = Gst.caps_from_string(caps_str)
+    capsfilter = Gst.ElementFactory.make("capsfilter")
+    capsfilter.set_property("caps", caps)
+    pipeline.add(capsfilter)
+    element.link(capsfilter)
+    return capsfilter
 
-def add_capsfilter(pipeline, element):
-    caps_filter = Gst.ElementFactory.make('capsfilter', 'caps')
-    caps_string = 'video/x-raw(memory:NVMM), format=RGBA, width='+ str(500) + ', height=' + str(500)
-    caps = Gst.Caps.from_string(caps_string)
-    caps_filter.set_property('caps', caps)
-    pipeline.add(caps_filter)
-    element.link(caps_filter)
-    return caps_filter
+def output_parser(pipeline,element,output_file,ext,async_mode=True):
+    if ext == "mp4":
+        # Create an x264enc element and link it to the videoconvert
+        encoder = Gst.ElementFactory.make("x264enc", "x264enc")
+        pipeline.add(encoder)
+        element.link(encoder)
 
-def input_parser(pipeline,source):
-    # Create a demux element and link it to the filesrc
-    demux = Gst.ElementFactory.make("identity", "qtdemux")
-    pipeline.add(demux)
-    source.link(demux)
-    # sinkpad = streammux.get_request_pad("sink_0")
-    # if not sinkpad:
-    #     print(" Unable to get the sink pad of streammux \n")
-    # srcpad = decoder.get_static_pad("src")
-    # srcpad.link(sinkpad)
+        # Create a h264parse element and link it to the encoder
+        parser = Gst.ElementFactory.make("h264parse", "h264parse_out")
+        pipeline.add(parser)
+        encoder.link(parser)
 
-    # Create a h264parse element and link it to the demux
-    parser = Gst.ElementFactory.make("h264parse", "h264parse_in")
-    pipeline.add(parser)
-    demux.link(parser)
+        # Create a mp4mux element and link it to the h264parse
+        mux = Gst.ElementFactory.make("mp4mux", "mp4mux")
+        pipeline.add(mux)
+        parser.link(mux)
+        encoded_output = mux
 
-    # Create an avdec_h264 element and link it to the parser
-    decoder = Gst.ElementFactory.make("avdec_h264", "avdec_h264")
-    pipeline.add(decoder)
-    parser.link(decoder)
+    elif ext == "jpg":
+        # Create an jpegenc element
+        encoder = Gst.ElementFactory.make("jpegenc", "jpegenc")
+        pipeline.add(encoder)
+        element.link(encoder)
+        encoded_output = add_videoconvert(pipeline,encoder)
 
-    return add_videoconvert(pipeline,decoder)
+    elif ext == "png":
+        # Create an pngenc element
+        encoder = Gst.ElementFactory.make("pngenc", "pngenc")
+        pipeline.add(encoder)
+        element.link(encoder)
+        encoded_output = encoder
 
-
-def output_parser(pipeline,element,output_file,async_mode=True):
-    # Create an x264enc element and link it to the videoconvert
-    encoder = Gst.ElementFactory.make("x264enc", "x264enc")
-    pipeline.add(encoder)
-    element.link(encoder)
-
-    # Create a h264parse element and link it to the encoder
-    parser = Gst.ElementFactory.make("h264parse", "h264parse_out")
-    pipeline.add(parser)
-    encoder.link(parser)
-
-    # Create a mp4mux element and link it to the h264parse
-    mux = Gst.ElementFactory.make("mp4mux", "mp4mux")
-    pipeline.add(mux)
-    parser.link(mux)
-
-    # Create a filesink element and link it to the mp4mux
+    # Create a filesink element and link it encoded_output
     filesink = Gst.ElementFactory.make("filesink", "filesink")
-    filesink.set_property("location", output_file)  # set the output file location
+    filesink.set_property("location", output_file+"."+ext)  # set the output file location
     filesink.set_property("async", async_mode)
     pipeline.add(filesink)
-    mux.link(filesink)
+    encoded_output.link(filesink)
 
 def bus_message(bus, message, pipeline, loop):
     # Handle bus messages
     t = message.type
     if t == Gst.MessageType.EOS:
+        print("End of stream begin")
         pipeline.set_state(Gst.State.NULL)
         loop.quit()
         print("End of stream")
@@ -130,14 +121,14 @@ def appsink_buffer(appsink,username):
         data = buffer.extract_dup(0, buffer_size)
         bgr_image = buffer_to_bgr(data,w,h,format)
 
-        cv2.imwrite(f"output/{username}_output.jpg",bgr_image)
-
+        cv2.imwrite(f"output/{username}_intermediate_output.jpg",bgr_image)
+        # print(f"appsink-->  output/{username}_intermediate_output.jpg")
         # print("________"*10)
-        # print("\n\n\n")
+
     return Gst.FlowReturn.OK
 
 def yv12_to_bgr(data: bytes, width: int, height: int) -> np.ndarray:
-    print("YV12 ----> BGR")
+    # print("YV12 ----> BGR")
     y_size = width * height
     uv_size = int(y_size / 4)
     y_plane = np.frombuffer(data[:y_size], dtype=np.uint8).reshape((height, width))
@@ -183,5 +174,3 @@ def buffer_to_bgr(data,w,h,format):
         return i420_to_bgr(data, w, h)
     else:
         print("Wrong format",format)
-
-
