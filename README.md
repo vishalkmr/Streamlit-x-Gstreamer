@@ -17,13 +17,4 @@ To install [Streamlit](https://docs.streamlit.io/library/get-started/installatio
 
 ```
     sudo apt-get install libgstreamer1.0-dev gstreamer1.0-plugins-good gstreamer1.0-tools
-<<<<<<< HEAD
 ```
-=======
-
-
-
-
-
-
->>>>>>> b80809456d70bd4fabb2e8693d9e4ecea24e1301
