@@ -1,6 +1,11 @@
 # Streamlit-x-Gstreamer
  This repository contains sample Streamlit apps that uses GStreamer for video streaming. These applications that demonstrate how to integrate GStreamer pipeline and applications with Streamlit, a popular Python library for building interactive web applications.
-https://github.com/vishalkmr/Streamlit-x-Gstreamer/assets/20735280/46a26c61-3aee-4734-b7f9-927b34188672
+
+
+
+https://github.com/vishalkmr/Streamlit-x-Gstreamer/assets/20735280/a965bdad-efc6-4b26-9b96-225bbec99314
+
+
  
 ## Dependencies
 Before running this application, make sure you have the following dependencies installed:
