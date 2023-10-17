@@ -114,6 +114,7 @@ class GstreamerPlayer:
 
                 # Create an appsink element and link it to the tee
                 tee1 = add_queue(st.session_state.pipeline,tee)
+                tee1 = add_capsfilter(st.session_state.pipeline,tee1)
                 appsink = Gst.ElementFactory.make("appsink", "sink")
                 st.session_state.pipeline.add(appsink)
                 tee1.link(appsink)
@@ -134,13 +135,13 @@ class GstreamerPlayer:
                 tee2 = add_queue(st.session_state.pipeline,tee)
                 output_parser(st.session_state.pipeline,tee2,output_file=f"output/{st.session_state.username}_output",async_mode=False,ext="mp4")
 
-                # # Create an autovideosink element and link it to the tee
-                # tee3 = add_queue(st.session_state.pipeline,tee,leaky=True)
-                # autovideosink = Gst.ElementFactory.make('autovideosink', 'autovideosink')
-                # st.session_state.pipeline.add(autovideosink)
-                # autovideosink.set_property("sync", False)
-                # tee3.link(autovideosink)
-                # add_queue(st.session_state.pipeline,autovideosink)
+                # Create an autovideosink element and link it to the tee
+                tee3 = add_queue(st.session_state.pipeline,tee,leaky=True)
+                autovideosink = Gst.ElementFactory.make('autovideosink', 'autovideosink')
+                st.session_state.pipeline.add(autovideosink)
+                autovideosink.set_property("sync", False)
+                tee3.link(autovideosink)
+                add_queue(st.session_state.pipeline,autovideosink)
 
                 # Add a signal watch to the bus
                 bus = st.session_state.pipeline.get_bus()
@@ -251,15 +252,15 @@ class GstreamerPlayer:
                     if ret == Gst.StateChangeReturn.SUCCESS:
                         if Gst.Element.state_get_name(state) == "NULL":
                             self.stop(already_stoped=True)
-                            st.experimental_rerun()
+                            st.rerun()
 
                     try:
                         window.image(f"output/{st.session_state.username}_intermediate_output.jpg",use_column_width="always")
                         time.sleep(.2)
-                        st.experimental_rerun()
+                        st.rerun()
 
                     except Exception as e:
-                        st.experimental_rerun()
+                        st.rerun()
     #################################################################################################################################
 
 def get_username():
