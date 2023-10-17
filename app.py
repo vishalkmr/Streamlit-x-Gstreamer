@@ -8,8 +8,6 @@ from streamlit.runtime.scriptrunner import add_script_run_ctx
 from gstreamer_utils import *
 import random
 import string
-from streamlit.elements.utils import _shown_default_value_warning
-_shown_default_value_warning = True
 
 # hide the header and footer
 st.markdown(""" <style>
