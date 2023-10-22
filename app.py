@@ -13,6 +13,12 @@ import streamlit as st
 from pipeline import GStreamerPipeline
 import random, time, string, os
 
+# Hide the header and footer
+st.markdown(""" <style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+</style> """, unsafe_allow_html=True)
+
 class Pipeline(GStreamerPipeline):
     def __init__(self):
         super().__init__()
@@ -137,7 +143,7 @@ class Player:
             self.create_user()
             
             # Define the GStreamer pipeline status to stop
-            st.session_state.status = "pause"
+            st.session_state.status = "stop"
 
             # Creating pipeline object
             st.session_state.pipeline = Pipeline()
@@ -165,7 +171,12 @@ class Player:
     def consol(self):
         try:
             # Define the Streamlit app
-            st.title(" Gstreamer Test App ")
+            if st.session_state.status == "play":
+                st.markdown("<h1 style='text-align: center; color: green;'>Streamlit-x-Gstreamer</h1>", unsafe_allow_html=True)
+            elif st.session_state.status == "stop":
+                st.markdown("<h1 style='text-align: center; color: red;'>Streamlit-x-Gstreamer</h1>", unsafe_allow_html=True)
+            else:
+                st.markdown("<h1 style='text-align: center; color: orange;'>Streamlit-x-Gstreamer</h1>", unsafe_allow_html=True)
 
             # Define input controls for pipeline parameters
             st.session_state.pipeline.controls()
@@ -221,8 +232,8 @@ class Player:
 
     def stop(self):
         # Stop the pipeline when the stop button is clicked
-        if st.session_state.status != "pause":
-            st.session_state.status = "pause"
+        if st.session_state.status != "stop":
+            st.session_state.status = "stop"
             st.session_state.pipeline.stop()
             time.sleep(.1)
             if st.session_state.filesink_enabled and os.path.isfile(f"output/{st.session_state.username}_output.mp4"):
