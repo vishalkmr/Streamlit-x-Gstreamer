@@ -5,6 +5,8 @@ This project demonstrate a way to integrate a GStreamer video player into a Stre
 https://github.com/vishalkmr/Streamlit-x-Gstreamer/assets/20735280/a965bdad-efc6-4b26-9b96-225bbec99314
 
 
+https://github.com/vishalkmr/Streamlit-x-Gstreamer/assets/20735280/d36f6592-fba1-4c83-95de-9f974dfd3ba4
+
  
 ## Dependencies
 Before running this application, make sure you have the following dependencies installed:
