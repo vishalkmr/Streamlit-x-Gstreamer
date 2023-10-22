@@ -2,7 +2,8 @@
 This project demonstrate a way to integrate a GStreamer video player into a Streamlit window. It leverages the power of GStreamer for video processing and rendering while utilizing the user-friendly interface of Streamlit for interactive controls. With this integration, users can easily configure video parameters, start, stop, and restart the video playback, and view the output within the Streamlit app. It simplifies the process of creating a GStreamer-based video player and makes it accessible to developers using Streamlit for their applications.
 
 
-https://github.com/vishalkmr/Streamlit-x-Gstreamer/assets/20735280/d36f6592-fba1-4c83-95de-9f974dfd3ba4
+[https://github.com/vishalkmr/Streamlit-x-Gstreamer/assets/20735280/d36f6592-fba1-4c83-95de-9f974dfd3ba4](https://github.com/vishalkmr/Streamlit-x-Gstreamer/assets/20735280/b3b5d049-98d3-4684-968b-85bf627599a2
+)
 
  
 ## Dependencies
