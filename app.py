@@ -1,3 +1,14 @@
+##################################################################################################################
+# Author: Vishal Kumar
+# Email: vishalkmr01123@gmail.com
+#
+# The file uses the Streamlit library to create a web-based user interface for the Gstreamer pipeline.
+# It includes the Pipeline class, which extends the GStreamerPipeline class, and the Player class, which manages the pipeline.
+# The Pipeline class is used to create a specific Gstreamer pipeline, and the Player class is used to start, stop, and reset the pipeline.
+# The file also includes controls for the pipeline parameters and output methods, and it displays the processed video output.
+##################################################################################################################
+
+
 import streamlit as st
 from pipeline import GStreamerPipeline
 import random, time, string, os
