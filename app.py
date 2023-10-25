@@ -57,6 +57,8 @@ class Pipeline(GStreamerPipeline):
         self.videotestsrc_controls()
         self.output_controls()
 
+    ##################################################################################################################
+    ##########  Vdeotestsrc  #########################################################################################
     def videotestsrc_params(self):
         st.session_state.pattern = 18
         st.session_state.flip = False
@@ -108,7 +110,10 @@ class Pipeline(GStreamerPipeline):
         element = self.pipeline.get_by_name("videotestsrc")
         element.set_property("animation-mode", st.session_state.animation_mode)
         print(f"Updated animation-mode -->{st.session_state.animation_mode_val} ({st.session_state.animation_mode})")
+    ##################################################################################################################
 
+    ##################################################################################################################
+    ##########  Pipeline Output Sinks  ###############################################################################
     def default_output_pramas(self):
         st.session_state.appsink_enabled = True
         st.session_state.filesink_enabled = False
@@ -134,6 +139,7 @@ class Pipeline(GStreamerPipeline):
     def update_autovideosink(self):
         st.session_state.autovideosink_enabled = st.session_state.autovideosink_val
         print(f"Updated AutoVideoSink -->{st.session_state.autovideosink_val} ({st.session_state.autovideosink_enabled})")
+    ##################################################################################################################
 
 
 class Player:
