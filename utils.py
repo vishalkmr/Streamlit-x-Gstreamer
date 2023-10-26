@@ -37,12 +37,27 @@ class RGB_Converter:
             return self.yv12_to_rgb(data, w, h)
         elif format =="I420":
             return self.i420_to_rgb(data, w, h)
-        elif format =="Y444_10LE":
-            print("parsingY444_10LE")
-            return self.y444_10le_to_rgb(data, w, h)
+        elif format =="BGR":
+            return self.bgr_to_rgb(data, w, h)
         else:
             print("Wrong format",format)
-        
+
+    def bgr_to_rgb(self, data, width, height):
+        """
+        Convert BGR image to RGB format.
+
+        Parameters:
+        data : Input image data in YV12 format.
+        width (int): Width of the input image.
+        height (int): Height of the input image.
+
+        Returns:
+        np.ndarray: Output image in RGB format.
+        """
+        numpy_array = np.ndarray((height, width, 3),buffer=data,dtype=np.uint8)
+        rgb_image = cv2.cvtColor(numpy_array, cv2.COLOR_BGR2RGB)
+        return rgb_image
+
     def yv12_to_rgb(self, data, width, height):
         """
         Convert YV12 image to RGB format.
@@ -115,41 +130,4 @@ class RGB_Converter:
         rgb_image = cv2.cvtColor(yuv_image, cv2.COLOR_YUV2RGB)
         return rgb_image
 
-    def y444_10le_to_rgb(self,data, width, height):
-        """
-        Convert Y444_10LE image to RGB format.
 
-        Parameters:
-        data : Input image data in Y444_10LE format.
-        width (int): Width of the input image.
-        height (int): Height of the input image.
-
-        Returns:
-        np.ndarray: Output image in RGB format.
-        """
-        # Calculate the number of bytes needed for the YUV data
-        y_size = width * height * 2  # Each Y pixel is 2 bytes (10 bits per channel)
-        uv_size = y_size  # U and V channels are the same size as Y
-        print("----> 1 ")
-
-        # Extract Y, U, and V planes from the data
-        y_plane = np.frombuffer(data[:y_size], dtype=np.uint16).reshape((height, width))
-        u_plane = np.frombuffer(data[y_size:y_size + uv_size], dtype=np.uint16).reshape((height, width))
-        v_plane = np.frombuffer(data[y_size + uv_size:], dtype=np.uint16).reshape((height, width))
-
-        print("----> 2 ")
-        # Normalize U and V values
-        u_plane = (u_plane - 512)  # Remove the offset for U (10-bit values)
-        v_plane = (v_plane - 512)  # Remove the offset for V (10-bit values)
-
-        print("----> 3 ")
-        # Combine Y, U, and V planes
-        yuv_image = np.dstack((y_plane, u_plane, v_plane))
-
-        print("----> 4 ")
-        # Convert YUV to RGB
-        rgb_image = cv2.cvtColor(yuv_image, cv2.COLOR_YUV2BGR_YV12)
-
-        cv2.imwrite("output_image.jpg", rgb_image)
-
-        return rgb_image

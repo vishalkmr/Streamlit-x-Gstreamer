@@ -12,6 +12,8 @@ gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 import queue
 from utils import *
+import streamlit as st
+
 
 
 class GstreamerElements: 
@@ -24,10 +26,11 @@ class GstreamerElements:
         """
         self.pipeline = pipeline
         self.buffer_queue = queue.Queue()
+        self.frame_num = 0
 
 
     @element_info
-    def videotestsrc(self, pattern=0, flip=False, motion=0, animation_mode=0):
+    def videotestsrc(self, pattern=18, flip=False, motion=0, animation_mode=0):
         """
         This function adds a videotestsrc element in the Gstreamer pipeline and sets its properties.
 
@@ -66,6 +69,80 @@ class GstreamerElements:
         return filesrc
 
     @element_info
+    def nvjpegdec(self, element):
+        """
+        This function adds an nvjpegdec element to the Gstreamer pipeline and links it to a previous element.
+
+        Args:
+            element (Gst.Element): The Gstreamer element to which the nvjpegdec is linked.
+
+        Returns:
+            Gst.Element: The nvjpegdec element that was created and added to the pipeline.
+        """
+        nvjpegdec = Gst.ElementFactory.make("nvjpegdec", "nvjpegdec")
+        self.pipeline.add(nvjpegdec)
+        element.link(nvjpegdec)
+        return nvjpegdec
+
+    @element_info
+    def jpegdec(self, element):
+        """
+        This function adds a jpegdec element to the Gstreamer pipeline and links it to a previous element.
+
+        Args:
+            element (Gst.Element): The Gstreamer element to which the jpegdec is linked.
+
+        Returns:
+            Gst.Element: The jpegdec element that was created and added to the pipeline.
+        """
+        jpegdec = Gst.ElementFactory.make("jpegdec")
+        self.pipeline.add(jpegdec)
+        element.link(jpegdec)
+        return jpegdec
+
+    @element_info
+    def pngdec(self, element):
+        """
+        This function adds a pngdec element to the Gstreamer pipeline and links it to a previous element.
+
+        Args:
+            element (Gst.Element): The Gstreamer element to which the pngdec is linked.
+
+        Returns:
+            Gst.Element: The pngdec element that was created and added to the pipeline.
+        """
+        pngdec = Gst.ElementFactory.make("pngdec")
+        self.pipeline.add(pngdec)
+        element.link(pngdec)
+        return pngdec
+
+    @element_info
+    def qtdemux(self, element):
+        """
+        This function adds a qtdemux element to the Gstreamer pipeline and links it to a previous element.
+
+        Args:
+            element (Gst.Element): The Gstreamer element to which the qtdemux is linked.
+
+        Returns:
+            Gst.Element: The qtdemux element that was created and added to the pipeline.
+        """
+        qtdemux = Gst.ElementFactory.make("qtdemux")
+        self.pipeline.add(qtdemux)
+        element.link(qtdemux)
+        return qtdemux
+
+
+    def demuxer_pad_added(self, demuxer, pad, avdec_h264):
+
+        # comment out below to debug inside callbacks
+        # import pydevd_pycharm
+        # pydevd_pycharm.settrace()
+
+        if pad.name == 'video_0':
+            demuxer.link(avdec_h264)
+
+    @element_info
     def nvstreammux(self, element, width, height, batch_size=1):
         """
         This function adds an nvstreammux element to the Gstreamer pipeline and sets its properties.
@@ -86,37 +163,38 @@ class GstreamerElements:
         nvstreammux.set_property("batch-size", batch_size)
         return nvstreammux
 
-    @element_info
-    def nvjpegdec(self, element):
-        """
-        This function adds an nvjpegdec element to the Gstreamer pipeline and links it to a previous element.
-
-        Args:
-            element (Gst.Element): The Gstreamer element to which the nvjpegdec is linked.
-
-        Returns:
-            Gst.Element: The nvjpegdec element that was created and added to the pipeline.
-        """
-        nvjpegdec = Gst.ElementFactory.make("nvjpegdec", "nvjpegdec")
-        self.pipeline.add(nvjpegdec)
-        element.link(nvjpegdec)
-        return nvjpegdec
 
     @element_info
-    def pngdec(self, element):
+    def h264parse(self, element):
         """
-        This function adds a pngdec element to the Gstreamer pipeline and links it to a previous element.
+        This function adds an h264parse element to the Gstreamer pipeline and links it to a previous element.
 
         Args:
-            element (Gst.Element): The Gstreamer element to which the pngdec is linked.
+            element (Gst.Element): The Gstreamer element to which the h264parse is linked.
 
         Returns:
-            Gst.Element: The pngdec element that was created and added to the pipeline.
+            Gst.Element: The h264parse element that was created and added to the pipeline.
         """
-        pngdec = Gst.ElementFactory.make("pngdec", "pngdec")
-        self.pipeline.add(pngdec)
-        element.link(pngdec)
-        return pngdec
+        h264parse = Gst.ElementFactory.make("h264parse")
+        self.pipeline.add(h264parse)
+        element.link(h264parse)
+        return h264parse
+
+    @element_info
+    def avdec_h264(self, element=None):
+        """
+        This function adds an avdec_h264 element to the Gstreamer pipeline and links it to a previous element.
+
+        Returns:
+            Gst.Element: The avdec_h264 element that was created and added to the pipeline.
+        """
+        avdec_h264 = Gst.ElementFactory.make("avdec_h264", "avdec_h264")
+        self.pipeline.add(avdec_h264)
+        
+        if element is not None:
+            element.link(avdec_h264)
+
+        return avdec_h264
 
     def nvv4l2decoder(self, element):
         """
@@ -132,6 +210,22 @@ class GstreamerElements:
         self.pipeline.add(nvv4l2decoder)
         element.link(nvv4l2decoder)
         return nvv4l2decoder
+
+    @element_info
+    def uridecodebin(self, uri):
+        """
+        This function adds a uridecodebin element to the Gstreamer pipeline and sets the uri.
+
+        Args:
+            uri (str): The uri to the input file.
+
+        Returns:
+            Gst.Element: The uridecodebin element that was created and added to the pipeline.
+        """
+        uridecodebin = Gst.ElementFactory.make("uridecodebin", "uridecodebin")
+        uridecodebin.set_property("uri", uri)
+        self.pipeline.add(uridecodebin)
+        return uridecodebin
 
     @element_info
     def identity(self, element, silent=0):
@@ -279,7 +373,7 @@ class GstreamerElements:
 
         if width and width:
             caps_string += f', width={width}, height={height}'
-
+        print(caps_string)
         caps = Gst.Caps.from_string(caps_string)
         caps_filter.set_property('caps', caps)
         self.pipeline.add(caps_filter)
@@ -348,27 +442,6 @@ class GstreamerElements:
         element.link(jpegenc)
         return jpegenc
 
-    def nvv4l2h264enc(self, element, bitrate=2000000, preset="hp", control_rate=1):
-        """
-        This function adds an nvv4l2h264enc element to the Gstreamer pipeline, sets its properties, and links it to a previous element.
-
-        Args:
-            element (Gst.Element): The Gstreamer element to which the nvv4l2h264enc is linked.
-            bitrate (int, optional): The desired bitrate for the encoded video in bps (bits per second). Defaults to 2,000,000 bps (2 Mbps).
-            preset (str, optional): The encoder preset (e.g., 'hp', 'hq', 'll', 'll-hp'). Defaults to 'hp'.
-            control_rate (int, optional): The control rate (1 = constant bitrate, 2 = variable bitrate). Defaults to 1 (constant bitrate).
-
-        Returns:
-            Gst.Element: The nvv4l2h264enc element that was created and added to the pipeline.
-        """
-        nvv4l2h264enc = Gst.ElementFactory.make("nvv4l2h264enc", "nvv4l2h264enc")
-        nvv4l2h264enc.set_property("bitrate", bitrate)
-        nvv4l2h264enc.set_property("preset", preset)
-        nvv4l2h264enc.set_property("control-rate", control_rate)
-        self.pipeline.add(nvv4l2h264enc)
-        element.link(nvv4l2h264enc)
-        return nvv4l2h264enc
-
     @element_info
     def x264enc(self, element, bitrate=2000, speed_preset="ultrafast", tune="zerolatency"):
         """
@@ -391,21 +464,26 @@ class GstreamerElements:
         element.link(x264enc)
         return x264enc
 
-    @element_info
-    def h264parse(self, element):
+    def nvv4l2h264enc(self, element, bitrate=2000000, preset="hp", control_rate=1):
         """
-        This function adds an h264parse element to the Gstreamer pipeline and links it to a previous element.
+        This function adds an nvv4l2h264enc element to the Gstreamer pipeline, sets its properties, and links it to a previous element.
 
         Args:
-            element (Gst.Element): The Gstreamer element to which the h264parse is linked.
+            element (Gst.Element): The Gstreamer element to which the nvv4l2h264enc is linked.
+            bitrate (int, optional): The desired bitrate for the encoded video in bps (bits per second). Defaults to 2,000,000 bps (2 Mbps).
+            preset (str, optional): The encoder preset (e.g., 'hp', 'hq', 'll', 'll-hp'). Defaults to 'hp'.
+            control_rate (int, optional): The control rate (1 = constant bitrate, 2 = variable bitrate). Defaults to 1 (constant bitrate).
 
         Returns:
-            Gst.Element: The h264parse element that was created and added to the pipeline.
+            Gst.Element: The nvv4l2h264enc element that was created and added to the pipeline.
         """
-        h264parse = Gst.ElementFactory.make("h264parse", "h264parse")
-        self.pipeline.add(h264parse)
-        element.link(h264parse)
-        return h264parse
+        nvv4l2h264enc = Gst.ElementFactory.make("nvv4l2h264enc", "nvv4l2h264enc")
+        nvv4l2h264enc.set_property("bitrate", bitrate)
+        nvv4l2h264enc.set_property("preset", preset)
+        nvv4l2h264enc.set_property("control-rate", control_rate)
+        self.pipeline.add(nvv4l2h264enc)
+        element.link(nvv4l2h264enc)
+        return nvv4l2h264enc
 
     @element_info
     def qtmux(self, element):
@@ -440,7 +518,7 @@ class GstreamerElements:
         return mp4mux
 
     @element_info
-    def filesink(self, element, output_file, file_ext, async_mode=True):
+    def filesink(self, element, output_file, file_ext):
         """
         This function adds a filesink element to the Gstreamer pipeline, sets its properties, and links it to a previous element.
 
@@ -448,41 +526,16 @@ class GstreamerElements:
             element (Gst.Element): The Gstreamer element to which the filesink is linked.
             output_file (str): The name of the output file without the file extension.
             file_ext (str): The file extension (e.g., 'mp4', 'avi', 'mkv').
-            async_mode (bool, optional): Whether to use asynchronous writing. Defaults to True.
 
         Returns:
             Gst.Element: The filesink element that was created and added to the pipeline.
         """
         filesink = Gst.ElementFactory.make("filesink", "filesink")
         filesink.set_property("location", f"output/{output_file}.{file_ext}")
-        filesink.set_property("async", async_mode)
+        filesink.set_property("async", True)
         self.pipeline.add(filesink)
         element.link(filesink)
         return filesink
-
-    def save_output(self, element, output_file, file_ext, async_mode=False):
-        if file_ext == "mp4":
-            # Create an x264enc element and link it to the videoconvert
-            encoder = self.x264enc(element)
-
-            # Create a h264parse element and link it to the encoder
-            parser = self.h264parse(encoder)
-
-            # Create a mp4mux element and link it to the h264parse
-            encoded_output = self.mp4mux(parser)
-
-        elif file_ext == "jpg":
-            # Create an jpegenc element
-            encoder = self.jpegenc(element)
-            encoded_output = self.videoconvert(encoder)
-
-        elif file_ext == "png":
-            # Create an pngenc element
-            encoder = self.pngenc(element)
-            encoded_output = self.videoconvert(encoder)
-        
-        return self.filesink(encoded_output, output_file, file_ext, async_mode)
-
 
     @element_info
     def autovideosink(self, element, sync=True):
@@ -506,6 +559,7 @@ class GstreamerElements:
     def buffer_dump_prob(self, appsink):
         sample = appsink.emit("pull-sample")
         if sample:
+            print("\n\nAppsink Frame-",self.frame_num)
             buffer = sample.get_buffer()
             # Parsing caps format
             caps_format = sample.get_caps().get_structure(0)
@@ -516,7 +570,9 @@ class GstreamerElements:
             rgb_converter = RGB_Converter()
             rgb_image = rgb_converter.buffer_to_rgb(data,w,h,format)
             #push the buffer into buffer_queue
-            self.buffer_queue.put(rgb_image)
+            # rgb_image = cv2.resize(rgb_image, (320, 240))
+            self.buffer_queue.put(rgb_image,block=False)
+            self.frame_num += 1
 
         return Gst.FlowReturn.OK
 
@@ -543,3 +599,120 @@ class GstreamerElements:
         self.pipeline.add(appsink)
         element.link(appsink)
         return appsink
+
+
+    def read_input(self, input_file, width=None, height=None):
+        filesrc = self.filesrc(file_path=input_file)
+        file_ext = input_file.split(".")[-1].lower()
+
+        if file_ext == "h264":
+            # Since the data format in the input file is elementary h264 stream, We need a h264parser
+            parser = self.h264parse(filesrc)
+
+            # Use avdec_h264 for decoding h264
+            decoder = self.avdec_h264(parser)
+
+        elif file_ext == "mp4":
+            qtdemux = self.qtdemux(filesrc)
+            decoder = self.avdec_h264()
+            # Dynamically link the qtdemux and decoder
+            qtdemux.connect("pad-added", self.demuxer_pad_added, decoder)
+
+        elif file_ext == "jpg":
+            # Create an jpegdec element
+            decoder = self.jpegdec(filesrc)
+
+        elif file_ext == "png":
+            # Create an pngdec element
+            decoder = self.pngdec(filesrc)
+            decoder = self.videoconvert(decoder)
+
+        # decoded_output = self.videoconvert(decoder)
+        return decoder
+    
+    def read_input1(self, input_file, width=None, height=None):
+        filesrc = self.filesrc(file_path=input_file)
+        file_ext = input_file.split(".")[-1].lower()
+
+        if file_ext == "h264":
+            # Since the data format in the input file is elementary h264 stream, We need a h264parser
+            parser = self.h264parse(filesrc)
+
+            # Use avdec_h264 for decoding h264
+            decoder = self.nvv4l2decoder(parser)
+
+        elif file_ext == "mp4":
+            qtdemux = self.qtdemux(filesrc)
+            decoder = self.avdec_h264()
+            # Dynamically link the qtdemux and decoder
+            qtdemux.connect("pad-added", self.demuxer_pad_added, decoder)
+        
+        elif file_ext == "jpg":
+            # Create an jpegdec element
+            decoder = self.jpegdec(filesrc)
+
+        elif file_ext == "png":
+            # Create an pngenc element
+            decoder = self.pngenc(filesrc)
+
+        streammux = self.nvstreammux(width=width, height=height)
+        sinkpad = streammux.get_request_pad("sink_0")
+        srcpad = decoder.get_static_pad("src")
+        srcpad.link(sinkpad)
+
+
+        # decoded_output = self.videoconvert(decoder)
+        return streammux
+
+    def write_output(self, element, output_file, file_ext, async_mode=False):
+        if file_ext == "mp4" or file_ext == "h264":
+            # Create an x264enc element and link it to the videoconvert
+            encoder = self.x264enc(element)
+
+            # Create a h264parse element and link it to the encoder
+            parser = self.h264parse(encoder)
+
+            # Create a mp4mux element and link it to the h264parse
+            encoded_output = self.mp4mux(parser)
+
+            file_ext = "mp4"
+
+        elif file_ext == "jpg":
+            # Create an jpegenc element
+            encoder = self.jpegenc(element)
+            # encoded_output = self.videoconvert(encoder)
+            encoded_output = encoder
+
+
+        elif file_ext == "png":
+            # Create an pngenc element
+            encoder = self.pngenc(element)
+            encoded_output = self.videoconvert(encoder)
+        
+        return self.filesink(encoded_output, output_file=output_file, file_ext=file_ext)
+
+
+    def write_output1(self, element, output_file, file_ext):
+        if file_ext == "mp4" or file_ext == "h264":
+            # Create an nvv4l2h264enc element and link it to the videoconvert
+            encoder = self.nvv4l2h264enc(element)
+
+            # Create a h264parse element and link it to the encoder
+            parser = self.h264parse(encoder)
+
+            # Create a qtmux element and link it to the h264parse
+            encoded_output = self.qtmux(parser)
+
+            file_ext = "mp4"
+
+        elif file_ext == "jpg":
+            # Create an jpegenc element
+            encoder = self.jpegenc(element)
+            encoded_output = self.nvvideoconvert(encoder)
+
+        elif file_ext == "png":
+            # Create an pngenc element
+            encoder = self.pngenc(element)
+            encoded_output = self.nvvideoconvert(encoder)
+        
+        return self.filesink(encoded_output, output_file=output_file, file_ext=file_ext)

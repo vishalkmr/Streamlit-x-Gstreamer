@@ -30,10 +30,11 @@ class GStreamerPipeline:
     def __init__(self):
         # creating the pipeline
         self.default_params()
+        self.create_pipeline()
 
     def default_params(self):
         """
-        This method should be overridden by subclasses to spacify the default params of elements.
+        This method should be overridden by subclasses to specify the default params of elements.
         """
         pass
 
@@ -41,7 +42,7 @@ class GStreamerPipeline:
         """
         This method should be overridden by subclasses to create the specific pipeline.
         Use self.element to add the new element in the pipeline
-        super().create_pipeline() needs to be called in overriden code to inintialize the pipeline
+        super().create_pipeline() needs to be called in overridden code to initialize the pipeline
         """
         # Initialize GStreamer
         Gst.init(None)
@@ -60,11 +61,20 @@ class GStreamerPipeline:
         self.bus.add_signal_watch()
         self.bus.connect("message", self.bus_message, self.pipeline, self.loop)
 
+    def listen_for_eos(self,pipeline, bus):
+        msg = bus.timed_pop_filtered(Gst.CLOCK_TIME_NONE, Gst.MessageType.EOS)
+
     def start(self):
         """
         This method is used to change the pipeline state to PLAYING
         """
+        # Set the pipeline to playing state
         self.pipeline.set_state(Gst.State.PLAYING)
+        
+        # # Start a thread to listen for EOS messages
+        # eos_listener_thread = threading.Thread(target=self.listen_for_eos, args=(self.pipeline, self.bus))
+        # eos_listener_thread.daemon = True  # Make the thread a daemon so it doesn't block program exit
+        # eos_listener_thread.start()
 
     def stop(self):
         """
@@ -81,9 +91,9 @@ class GStreamerPipeline:
 
     def bus_message(self, bus, message, pipeline, loop):
         """
-        This mehtod dandles bus messages
+        This method dandles bus messages
         """
-        bus_msg_enable= False
+        bus_msg_enable= True
         if message.type == Gst.MessageType.EOS:
             pipeline.set_state(Gst.State.NULL)
             loop.quit()
@@ -104,8 +114,8 @@ class GStreamerPipeline:
 
         elif message.type == Gst.MessageType.TAG:
             tag_list = message.parse_tag()
-            if bus_msg_enable:
-                print("Tag: %s" % tag_list.to_string())
+            # if bus_msg_enable:
+            #     print("Tag: %s" % tag_list.to_string())
 
         elif message.type == Gst.MessageType.WARNING:
             err, debug = message.parse_warning()
