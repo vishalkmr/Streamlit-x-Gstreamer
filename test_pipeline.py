@@ -34,8 +34,8 @@ class Pipeline(GStreamerPipeline):
 
         # src = self.elements.uridecodebin(uri="file:///home/vishkumar/code-base/Streamlit-x-Gstreamer/input/1.mp4")
 
-        src = self.elements.read_input(input_file="input/sample_720p.h264")
-        # src = self.elements.read_input(input_file="input/sample_720p_small.mp4")
+        # src = self.elements.read_input(input_file="input/3.h264")
+        src = self.elements.read_input(input_file="input/sample_720p_small.mp4")
         # src = self.elements.read_input(input_file="1.PNG")
         # src = self.elements.read_input(input_file="team.jpg")
 
@@ -64,9 +64,6 @@ class Pipeline(GStreamerPipeline):
         self.create_pipeline()
         super().start()
 
-    def default_params(self):
-        self.default_input_params()
-        self.default_output_params()
 
     ##################################################################################################################
     ##########  Pipeline Input Sinks  ################################################################################

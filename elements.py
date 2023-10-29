@@ -10,10 +10,10 @@
 import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
-import queue
+import queue , threading
 from utils import *
 import streamlit as st
-
+from streamlit.runtime.scriptrunner import add_script_run_ctx
 
 
 class GstreamerElements: 
@@ -25,10 +25,12 @@ class GstreamerElements:
             pipeline (Gst.Pipeline): The Gstreamer pipeline to which elements will be added.
         """
         self.pipeline = pipeline
-        self.buffer_queue = queue.Queue()
-        self.frame_num = 0
-
-
+        self.buffer_queue = queue.Queue(maxsize=10000)
+        self.in_frame_num = 1
+        self.in_time = None
+        
+        progress_text = "Frame processed"
+        self.my_bar = st.empty()
     @element_info
     def videotestsrc(self, pattern=18, flip=False, motion=0, animation_mode=0):
         """
@@ -373,7 +375,7 @@ class GstreamerElements:
 
         if width and width:
             caps_string += f', width={width}, height={height}'
-        print(caps_string)
+
         caps = Gst.Caps.from_string(caps_string)
         caps_filter.set_property('caps', caps)
         self.pipeline.add(caps_filter)
@@ -559,7 +561,8 @@ class GstreamerElements:
     def buffer_dump_prob(self, appsink):
         sample = appsink.emit("pull-sample")
         if sample:
-            print("\n\nAppsink Frame-",self.frame_num)
+            self.in_frame_num +=1
+            # st.session_state.in_frame +=1
             buffer = sample.get_buffer()
             # Parsing caps format
             caps_format = sample.get_caps().get_structure(0)
@@ -572,7 +575,6 @@ class GstreamerElements:
             #push the buffer into buffer_queue
             # rgb_image = cv2.resize(rgb_image, (320, 240))
             self.buffer_queue.put(rgb_image,block=False)
-            self.frame_num += 1
 
         return Gst.FlowReturn.OK
 
@@ -592,10 +594,10 @@ class GstreamerElements:
         appsink.set_property("buffer-list", True)
         appsink.set_property("emit-signals", True)
         appsink.set_property("drop", True)
-        
+
         # Connect the callback function to the appsink's "new-sample" signal
         appsink.connect("new-sample", self.buffer_dump_prob)
-        
+
         self.pipeline.add(appsink)
         element.link(appsink)
         return appsink
@@ -625,7 +627,7 @@ class GstreamerElements:
         elif file_ext == "png":
             # Create an pngdec element
             decoder = self.pngdec(filesrc)
-            decoder = self.videoconvert(decoder)
+            # decoder = self.videoconvert(decoder)
 
         # decoded_output = self.videoconvert(decoder)
         return decoder
