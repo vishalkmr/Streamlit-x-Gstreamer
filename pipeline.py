@@ -64,7 +64,7 @@ class GStreamerPipeline:
 
         # Frame Counter
         self.out_frame_num = 1
-        self.out_time = None
+        self.start_time = None
 
         # EOS flag
         self.eos_occurred = False
@@ -81,7 +81,7 @@ class GStreamerPipeline:
         """
         # Set the pipeline to playing state
         self.pipeline.set_state(Gst.State.PLAYING)
-        self.elements.in_time = self.out_time = time.time()
+        self.start_time = time.time()
 
     def stop(self):
         """

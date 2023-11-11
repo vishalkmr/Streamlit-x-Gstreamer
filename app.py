@@ -19,7 +19,6 @@ import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst, GObject, GLib
 from streamlit.runtime.scriptrunner import add_script_run_ctx
-
 # Hide the header and footer
 st.markdown(""" <style>
 #MainMenu {visibility: hidden;}
@@ -60,11 +59,19 @@ class Player:
             time.sleep(.1)
             if st.session_state.status == "play":
                 if st.session_state.pipeline.eos_occurred:
+                    print("######################################### EOS FOund .....")
                     self.stop()
+                    print("--> check_eos stop done")
                     break
+                else:
+                    print("######################################### Runiing .....")
+                
+            else:
+                print("#########################################Stoped .....")
 
     def display_output(self):
         # Display the processed output
+        
         with st.sidebar:
             output = st.expander("Output 📷",expanded=True)
             with output:
@@ -107,11 +114,14 @@ class Player:
                                 st.rerun()
 
                         if (st.session_state.input_ext == "h264" or st.session_state.input_ext == "mp4"):
-                            txt1.text(f"\nInFrame->{st.session_state.pipeline.elements.in_frame_num} OutFrame->{st.session_state.pipeline.out_frame_num}")
-                            txt2.text(f"TotalFrame->{st.session_state.max_frame}")
-                            txt3.text(f"InFPS : {round(st.session_state.pipeline.elements.in_frame_num/(time.time()-st.session_state.pipeline.elements.in_time),2)}   OutFPS : {round(st.session_state.pipeline.out_frame_num/(time.time()-st.session_state.pipeline.out_time),2)}")
-                            image = st.session_state.pipeline.fetch_buffer()
-                            window.image(image,use_column_width="always")
+                            try:
+                                txt1.text(f"\nInFrame->{st.session_state.pipeline.elements.in_frame_num} OutFrame->{st.session_state.pipeline.out_frame_num}")
+                                txt2.text(f"TotalFrame->{st.session_state.max_frame}")
+                                txt3.text(f"InFPS : {round(st.session_state.pipeline.elements.in_frame_num/(time.time()-st.session_state.pipeline.elements.in_time),2)}   OutFPS : {round(st.session_state.pipeline.out_frame_num/(time.time()-st.session_state.pipeline.out_time),2)}")
+                                image = st.session_state.pipeline.fetch_buffer()
+                                window.image(image,use_column_width="always")
+                            except Exception as e:
+                                pass
 
                         # if st.session_state.image_input:
                         #     time.sleep(1)
@@ -131,18 +141,7 @@ class Player:
                         #         print("########## found eos from display ")
                         #         self.stop()
                         #         st.rerun()
-                else:
-                    if st.session_state.image_input:
-                        image = Image.open(f"input/{st.session_state.input_name}")
-                        window.image(image)
-                    
-                    # Load the video from file
-                    else:
-                        if st.session_state.input_ext == "mp4":
-                            video = open(f"input/{st.session_state.input_name}", 'rb')
-                            video_bytes = video.read()
 
-                            window.video(video_bytes)
 
     def clear_user_data(self):
         # Get a list of all files that start with 'output/{st.session_state.username}_output'
@@ -191,11 +190,12 @@ class Player:
         st.session_state.status = "play"
         st.session_state.output_available = False
         self.clear_user_data()
-        st.session_state.pipeline.start()
-
+        
         # self.test_thread = threading.Thread(target=self.check_eos)
         # add_script_run_ctx(self.test_thread)
         # self.test_thread.start()
+        
+        st.session_state.pipeline.start()
 
     def stop(self):
         # Stop the pipeline when the stop button is clicked
@@ -209,6 +209,7 @@ class Player:
                     # st.session_state.pipeline.eos_occurred = False
                     time.sleep(1)
                     break
+
 
 if __name__ == "__main__":
     player = Player()  

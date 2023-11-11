@@ -12,8 +12,6 @@ gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 import queue , threading
 from utils import *
-import streamlit as st
-from streamlit.runtime.scriptrunner import add_script_run_ctx
 
 
 class GstreamerElements: 
@@ -30,7 +28,6 @@ class GstreamerElements:
         self.in_time = None
         
         progress_text = "Frame processed"
-        self.my_bar = st.empty()
     @element_info
     def videotestsrc(self, pattern=18, flip=False, motion=0, animation_mode=0):
         """
@@ -562,7 +559,6 @@ class GstreamerElements:
         sample = appsink.emit("pull-sample")
         if sample:
             self.in_frame_num +=1
-            # st.session_state.in_frame +=1
             buffer = sample.get_buffer()
             # Parsing caps format
             caps_format = sample.get_caps().get_structure(0)
